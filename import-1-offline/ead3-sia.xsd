@@ -2063,6 +2063,8 @@ M359: In &lt;datesingle> se @notbefore e @notafter sono entrambi presenti, i lor
                          and (number(@notafter) = 49 + number(@notbefore)))
                      or (    (51 = (number(@notbefore) mod 100))
                          and (number(@notafter) = 49 + number(@notbefore)))
+                     or (    ( 1 = (number(@notbefore) mod 100))
+                         and (number(@notafter) = 99 + number(@notbefore)))
                 else true()"/>
         <xs:assert xa:message="[&#x0a;&#x0a;
 M360: In &lt;datesingle> il valore di @notbefore, se presente, non può valere&#x0a;
@@ -2156,6 +2158,8 @@ M359: In &lt;fromdate> se @notbefore e @notafter sono entrambi presenti, i loro&
                          and (number(@notafter) = 49 + number(@notbefore)))
                      or (    (51 = (number(@notbefore) mod 100))
                          and (number(@notafter) = 49 + number(@notbefore)))
+                     or (    ( 1 = (number(@notbefore) mod 100))
+                         and (number(@notafter) = 99 + number(@notbefore)))
                 else true()"/>
         <xs:assert xa:message="[&#x0a;&#x0a;
 M360: In &lt;fromdate> il valore di @notbefore, se presente, non può valere &quot;0000&quot;&#x0a;
@@ -2241,6 +2245,8 @@ M359: In &lt;todate> se @notbefore e @notafter sono entrambi presenti, i loro&#x
                          and (number(@notafter) = 49 + number(@notbefore)))
                      or (    (51 = (number(@notbefore) mod 100))
                          and (number(@notafter) = 49 + number(@notbefore)))
+                     or (    ( 1 = (number(@notbefore) mod 100))
+                         and (number(@notafter) = 99 + number(@notbefore)))
                 else true()"/>
         <xs:assert xa:message="[&#x0a;&#x0a;
 M360: In &lt;todate> il valore di @notbefore, se presente, non può valere &quot;0000&quot;&#x0a;

@@ -823,13 +823,105 @@ femminile."
       <xs:attribute name="localType" type="xs:anyURI"/>
 
       <xs:assert xpathDefaultNamespace="urn:isbn:1-931666-33-4"
-       xao:message="&#xa; eac-cpf 0041&#xa; identity/entityType[.='family'] ammette in cpfDescription/description/existDates/(dateRange|date|(dateSet/date)|(dateSet/dateRange))/@localType i valori univoci:&#xa;
+       xao:message="&#xa; eac-cpf 0041&#xa; la codifica del secolo ammette solo valori controllati e (con mese e giorno estremi 01-01, 12-31)&#xa;
+ ----------+-----------+--------------&#xa;
+ notBefore | notAafter |&#xa;
+ ----------+-----------+--------------&#xa;
+   nn01    |     nn10  | Inizio&#xa;
+   nn46    |     nn55  | Metà&#xa;
+   nn91    | (nn+1)00  | Fine&#xa;
+   nn01    |     nn25  | Primo quarto&#xa;
+   nn26    |     nn50  | Secondo quarto&#xa;
+   nn51    |     nn75  | Terzo quarto&#xa;
+   nn76    | (nn+1)00  | Ultimo quarto&#xa;
+   nn01    |     nn50  | Prima metà&#xa;
+   nn51    | (nn+1)00  | Seconda metà&#xa;
+   nn01    | (nn+1)00  | Completo&#xa;
+ ----------+-----------+--------------&#xa;
+"
+       test="
+          every $v in 
+          (
+           (
+            ((dateRange|(dateSet/dateRange))[contains(lower-case(@localType),'secolo')]/(fromDate|toDate))
+             |
+            ((date|(dateSet/date))[contains(lower-case(@localType),'secolo')])
+           )
+           [@notBefore or @notAfter]
+          )
+           satisfies
+          (
+           (
+            (
+             $v/@notAfter
+            )
+            or
+            (
+             (string-length(string($v/@notBefore)) &lt; 6 or month-from-date($v/@notBefore)=1)
+              and
+             (string-length(string($v/@notBefore)) &lt; 9 or   day-from-date($v/@notBefore)=1)
+              and
+             (
+                 ( 1 = (year-from-date($v/@notBefore) mod 100))
+              or (46 = (year-from-date($v/@notBefore) mod 100))
+              or (91 = (year-from-date($v/@notBefore) mod 100))
+              or (26 = (year-from-date($v/@notBefore) mod 100))
+              or (51 = (year-from-date($v/@notBefore) mod 100))
+              or (76 = (year-from-date($v/@notBefore) mod 100))
+             )
+            )
+           )
+            and
+           (
+            (
+             $v/@notBefore
+            )
+            or
+            (
+             (string-length(string($v/@notAfter)) &lt; 6 or month-from-date($v/@notAfter)=12)
+              and
+             (string-length(string($v/@notAfter)) &lt; 9 or   day-from-date($v/@notAfter)=31)
+              and
+             (
+                 (10 = (year-from-date($v/@notAfter) mod 100))
+              or (55 = (year-from-date($v/@notAfter) mod 100))
+              or ( 0 = (year-from-date($v/@notAfter) mod 100))
+              or (25 = (year-from-date($v/@notAfter) mod 100))
+              or (50 = (year-from-date($v/@notAfter) mod 100))
+              or (75 = (year-from-date($v/@notAfter) mod 100))
+             )
+            )
+           )
+            and
+           ( 
+            (
+             not($v/@notBefore) or not($v/@notAfter)
+            )
+            or
+            (
+                ( ( 1 = (year-from-date($v/@notBefore) mod 100)) and (year-from-date($v/@notAfter) =  9 + year-from-date($v/@notBefore)) )
+             or ( (46 = (year-from-date($v/@notBefore) mod 100)) and (year-from-date($v/@notAfter) =  9 + year-from-date($v/@notBefore)) )
+             or ( (91 = (year-from-date($v/@notBefore) mod 100)) and (year-from-date($v/@notAfter) =  9 + year-from-date($v/@notBefore)) )
+             or ( ( 1 = (year-from-date($v/@notBefore) mod 100)) and (year-from-date($v/@notAfter) = 24 + year-from-date($v/@notBefore)) )
+             or ( (26 = (year-from-date($v/@notBefore) mod 100)) and (year-from-date($v/@notAfter) = 24 + year-from-date($v/@notBefore)) )
+             or ( (51 = (year-from-date($v/@notBefore) mod 100)) and (year-from-date($v/@notAfter) = 24 + year-from-date($v/@notBefore)) )
+             or ( (76 = (year-from-date($v/@notBefore) mod 100)) and (year-from-date($v/@notAfter) = 24 + year-from-date($v/@notBefore)) )
+             or ( ( 1 = (year-from-date($v/@notBefore) mod 100)) and (year-from-date($v/@notAfter) = 49 + year-from-date($v/@notBefore)) )
+             or ( (51 = (year-from-date($v/@notBefore) mod 100)) and (year-from-date($v/@notAfter) = 49 + year-from-date($v/@notBefore)) )
+             or ( ( 1 = (year-from-date($v/@notBefore) mod 100)) and (year-from-date($v/@notAfter) = 99 + year-from-date($v/@notBefore)) )
+            )
+           )
+          )
+       "/>
+
+      <xs:assert xpathDefaultNamespace="urn:isbn:1-931666-33-4"
+       xao:message="&#xa; eac-cpf 0041&#xa; identity/entityType[not(.='person')] ammette in cpfDescription/description/existDates/(dateRange|date|(dateSet/date)|(dateSet/dateRange))/@localType i valori:&#xa;
 dataRemota,
 dataRecente,
 secoloRemoto,
 secoloRecente."
        test="
-        not(normalize-space(lower-case(../../identity/entityType)) = 'family')
+        (normalize-space(lower-case(../../identity/entityType)) = 'person')
         or
         (
          (
@@ -852,13 +944,17 @@ secoloRecente."
        "/>
 
       <xs:assert xpathDefaultNamespace="urn:isbn:1-931666-33-4"
-       xao:message="&#xa; eac-cpf 0061 0062&#xa; identity/entityType[.='family'] ammette in cpfDescription/description/existDates/descriptiveNote/p/span/@localType i valori univoci:&#xa;
+       xao:message="&#xa; eac-cpf 0061 0062&#xa; identity/entityType[not(.='person')] ammette in cpfDescription/description/existDates/descriptiveNote/p/span/@localType i valori:&#xa;
 specificaSecoloRemoto,
 specificaSecoloRecente,
+validitaSecoloRemoto,
+validitaSecoloRecente,
+specificaEstremoRemoto,
+specificaEstremoRecente,
 validitaEstremoRemoto,
 validitaEstremoRecente."
        test="
-        not(normalize-space(lower-case(../../identity/entityType)) = 'family')
+        (normalize-space(lower-case(../../identity/entityType)) = 'person')
         or
         (
          (
@@ -866,14 +962,22 @@ validitaEstremoRecente."
           (
               normalize-space(lower-case($v))='specificasecoloremoto'
            or normalize-space(lower-case($v))='specificasecolorecente'
+           or normalize-space(lower-case($v))='validitasecoloremoto'
+           or normalize-space(lower-case($v))='validitasecolorecente'
+           or normalize-space(lower-case($v))='specificaestremoremoto'
+           or normalize-space(lower-case($v))='specificaestremorecente'
            or normalize-space(lower-case($v))='validitaestremoremoto'
            or normalize-space(lower-case($v))='validitaestremorecente'
           )
          )
          and
          (
-              count(descriptiveNote/p/span/@localType[normalize-space(lower-case(.))='specificasecoloremoto' ]) &lt;=1
-          and count(descriptiveNote/p/span/@localType[normalize-space(lower-case(.))='specificasecolorecente']) &lt;=1
+              count(descriptiveNote/p/span/@localType[normalize-space(lower-case(.))='specificasecoloremoto'  ]) &lt;=1
+          and count(descriptiveNote/p/span/@localType[normalize-space(lower-case(.))='specificasecolorecente' ]) &lt;=1
+          and count(descriptiveNote/p/span/@localType[normalize-space(lower-case(.))='validitasecoloremoto'   ]) &lt;=1
+          and count(descriptiveNote/p/span/@localType[normalize-space(lower-case(.))='validitasecolorecente'  ]) &lt;=1
+          and count(descriptiveNote/p/span/@localType[normalize-space(lower-case(.))='specificaestremoremoto' ]) &lt;=1
+          and count(descriptiveNote/p/span/@localType[normalize-space(lower-case(.))='specificaestremorecente']) &lt;=1
           and count(descriptiveNote/p/span/@localType[normalize-space(lower-case(.))='validitaestremoremoto'  ]) &lt;=1
           and count(descriptiveNote/p/span/@localType[normalize-space(lower-case(.))='validitaestremorecente' ]) &lt;=1
          )
@@ -881,7 +985,7 @@ validitaEstremoRecente."
        "/>
 
       <xs:assert xpathDefaultNamespace="urn:isbn:1-931666-33-4"
-       xao:message="&#xa; eac-cpf 0058 0059&#xa; identity/entityType[.='person'] ammette in cpfDescription/description/existDates/(dateRange|date|(dateSet/date)|(dateSet/dateRange))/@localType i valori univoci:&#xa;
+       xao:message="&#xa; eac-cpf 0058 0059&#xa; identity/entityType[.='person'] ammette in cpfDescription/description/existDates/(dateRange|date|(dateSet/date)|(dateSet/dateRange))/@localType i valori:&#xa;
 dataDiNascita,
 dataDiMorte,
 secoloDiNascita,
@@ -897,6 +1001,8 @@ secoloDiMorte."
            or normalize-space(lower-case($v))='datadimorte'
            or normalize-space(lower-case($v))='secolodinascita'
            or normalize-space(lower-case($v))='secolodimorte'
+           or normalize-space(lower-case($v))='secolonascita'
+           or normalize-space(lower-case($v))='secolomorte'
           )
          )
          and
@@ -905,12 +1011,14 @@ secoloDiMorte."
           and count((dateRange|date|(dateSet/date)|(dateSet/dateRange))/@localType[normalize-space(lower-case(.))='datadimorte'    ]) &lt;=1
           and count((dateRange|date|(dateSet/date)|(dateSet/dateRange))/@localType[normalize-space(lower-case(.))='secolodinascita']) &lt;=1
           and count((dateRange|date|(dateSet/date)|(dateSet/dateRange))/@localType[normalize-space(lower-case(.))='secolodimorte'  ]) &lt;=1
+          and count((dateRange|date|(dateSet/date)|(dateSet/dateRange))/@localType[normalize-space(lower-case(.))='secolonascita'  ]) &lt;=1
+          and count((dateRange|date|(dateSet/date)|(dateSet/dateRange))/@localType[normalize-space(lower-case(.))='secolomorte'    ]) &lt;=1
          )
         )
        "/>
       
       <xs:assert xpathDefaultNamespace="urn:isbn:1-931666-33-4"
-       xao:message="&#xa; eac-cpf 0061 0062&#xa; identity/entityType[.='person'] ammette in cpfDescription/description/existDates/descriptiveNote/p/span/@localType i valori univoci:&#xa;
+       xao:message="&#xa; eac-cpf 0061 0062&#xa; identity/entityType[.='person'] ammette in cpfDescription/description/existDates/descriptiveNote/p/span/@localType i valori:&#xa;
 specificaDataNascita,
 specificaDataMorte,
 validitaDataNascita,
